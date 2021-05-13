@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5" />
+		<link rel="stylesheet" href="./css/mdui.min.css" />
+		<link rel="stylesheet" href="./css/mdui.docs.css" />
+		<link rel="stylesheet" href="./css/aplayer.min.css" />
+		<script type="text/javascript" src="https://cdn.bootcss.com/vConsole/3.3.0/vconsole.min.js"></script>
+		<script src="./js/aplayer.min.js"></script>
+		<script src="./js/mdui.min.js"></script>
+		<script src="./js/color-thief.min.js"></script>
+		<script>
+			function setCookie(name, value) {
+				var Days = 30;
+				var exp = new Date();
+				exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+				document.cookie = name + "=" + escape (value) + ";expires=" + exp.toGMTString() + ";path=/";
+			}
+
+			function getCookie(name) {
+				var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+				if (arr=document.cookie.match(reg)) {
+					return unescape(arr[2]);
+				} else {
+					return null;
+				}
+			}
+		</script>
+		<title>网易云音乐在线</title>
+		<style>
+			html, body {
+				scroll-behavior: smooth;
+			}
+			
+			footer {
+				height: auto;
+				padding: 4px;
+				line-height: 40px;
+				background: #f2f2f2;
+				font-size: 10pt;
+			}
+		</style>
+	</head>
+	
+	<body class="mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-teal mdui-theme-accent-blue mdui-theme-layout-auto">
+		<script>
+			if (getCookie('darkmode') == 'true') {
+				mdui.$('body').removeClass('mdui-theme-layout-auto');
+				mdui.$('body').addClass('mdui-theme-layout-dark');
+				
+			} else if (getCookie('darkmode')) {
+				mdui.$('body').removeClass('mdui-theme-layout-auto');
+				
+			}
+		</script>
+		
+		<header class="mdui-appbar mdui-appbar-fixed">
+			<div class="mdui-progress mdui-hidden" id="mdui_loading" style="position:absolute;background:none;">
+				<div class="mdui-progress-indeterminate" style="background:white"></div>
+			</div>
+			
+			<div class="mdui-toolbar mdui-color-theme _main-color">
+				<button class="mdui-btn mdui-ripple mdui-btn-icon" mdui-drawer="{'target':'#drawer','swipe':true}"><i class="mdui-icon material-icons">menu</i></button>
+				<a href="#" class="mdui-typo-headline">网易云音乐在线</a>
+				<div class="mdui-toolbar-spacer"></div>
+				<button onclick="toggleDarkmode(this)" class="mdui-btn mdui-ripple mdui-btn-icon" id="darkmodeBtn"><i class="mdui-icon material-icons">&#xe1ab;</i></button>
+				<button class="mdui-btn mdui-ripple mdui-btn-icon" mdui-menu="{target:'#main_menu'}"><i class="mdui-icon material-icons">more_vert</i></button>
+				
+				<ul class="mdui-menu" id="main_menu">
+					<li class="mdui-menu-item" onclick="enableConsole(this)">
+						<a href="javascript:;" class="mdui-ripple">
+							<i class="mdui-menu-item-icon mdui-icon material-icons">&#xe1b0;</i>启用 vConsole
+						</a>
+					</li>
+				</ul>
+			</div>
+		</header>
+		
+		<script>
+			if (getCookie('darkmode') == 'true') {
+				mdui.$('#darkmodeBtn').html('<i class="mdui-icon material-icons">&#xe3a9;</i>');
+				
+			} else if(getCookie('darkmode')) {
+				mdui.$('#darkmodeBtn').html('<i class="mdui-icon material-icons">&#xe3ac;</i>');
+				
+			}
+		</script>
+		
+		<drawer class="mdui-drawer" id="drawer">
+			<nav class="mdui-list">
+				<a href="#" class="mdui-list-item mdui-ripple">
+					<i class="mdui-list-item-icon mdui-icon material-icons">&#xe88a;</i>
+					<div class="mdui-list-item-content">首页</div>
+				</a>
+				<div class="mdui-divider"></div>
+				<a href="#searchBox" class="mdui-list-item mdui-ripple">
+					<i class="mdui-list-item-icon mdui-icon material-icons">&#xe8b6;</i>
+					<div class="mdui-list-item-content">搜索</div>
+				</a>
+				<a href="#resultDiv" class="mdui-list-item mdui-ripple">
+					<i class="mdui-list-item-icon mdui-icon material-icons">&#xe892;</i>
+					<div class="mdui-list-item-content">搜索结果</div>
+				</a>
+				<div class="mdui-divider"></div>
+				<a href="https://afdian.net/@MisaLiu" target="_blank" class="mdui-list-item mdui-ripple">
+					<i class="mdui-list-item-icon mdui-icon material-icons">&#xe227;</i>
+					<div class="mdui-list-item-content">捐赠</div>
+				</a>
+			</nav>
+		</drawer>
+		
+		<main class="mdui-container" id="container">
+			<center><h1>网易云音乐在线</h1></center>
+			
+			<div style="position:relative;top:76px;height:0;left:0" id="search"></div>
+			<div class="mdui-card" id="searchBox">
+				<div class="mdui-card-content" style="padding-bottom:4px">
+					<div class="mdui-textfield mdui-textfield-floating-label" style="margin-top:0;margin-bottom:0;padding-top:0">
+						<i class="mdui-icon material-icons">&#xe8b6;</i>
+						<label class="mdui-textfield-label" id="searchLabel">搜索音乐</label>
+						<input class="mdui-textfield-input" id="searchKwd" onkeyup="searchRecommend()" required/>
+						<div class="mdui-textfield-error">请输入欲搜索的音乐关键词</div>
+					</div>
+				</div>
+				
+				<div class="mdui-card-actions" style="padding-top:4px">
+					<button onclick="searchSong()" class="mdui-btn mdui-ripple mdui-float-right mdui-text-color-theme-accent">
+						<i class="mdui-icon material-icons">&#xe8b6;</i>&nbsp;搜索
+					</button>
+				</div>
+			</div>
+			
+			<div style="margin-top:16px;margin-bottom:16px" id="resultDiv">
+				<div class="mdui-card">
+					<div class="mdui-card-content">
+						<center class="mdui-text-color-theme-disabled">还没有开始搜索</center>
+					</div>
+				</div>
+			</div>
+			
+			<ul class="mdui-menu" id="search_recommend"></ul>
+			
+		</main>
+		
+		<footer class="doc-footer-nav mdui-typo">
+			<center>
+				Made by <a href="https://misaliu.top" target="_blank">MisaLiu</a><br>
+				Powered by <a href="https://music.163.com" target="_blank">Netease</a> &
+				<a href="https://api.yimian.xyz" target="_blank">Ushio API</a> &
+				<a href="https://mdui.org" target="_blank">MDUI</a> &
+				<a href="https://aplayer.js.org" target="_blank">APlayer</a> &
+				<a href="https://github.com/lokesh/color-thief" target="_blank">ColorThief</a><br>
+				本站信息均来源于网易云音乐，音乐版权归原作者/网易云音乐所有
+			</center>
+		</footer>
+		
+		<div class="mdui-dialog" id="info_dialog"></div>
+		
+		<script src="./js/main.js?202105131647"></script>
+	</body>
+</html>
