@@ -1,2 +1,1 @@
-# Netease-Music-Online
-（水个 repo）网易云音乐在线版
+不想写 README 啊，我就想随便做点什么然后水个 Repo
