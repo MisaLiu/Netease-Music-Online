@@ -217,7 +217,7 @@ function songAddList(songId, fee = 0) { // 添加歌曲到播放列表
 	if (fee == 1) {
 		mdui.confirm('您正在尝试播放的歌曲可能不被网易云允许直接播放<br>是否强行尝试播放？', '警告',
 			function() {
-				playSong(songId);
+				songAddList(songId);
 			},
 			function() {},
 			{
@@ -364,7 +364,7 @@ function songDownload(songId, fee = 0) { // 下载音乐
 	if (fee == 1) {
 		mdui.confirm('您正在尝试下载的歌曲可能不被网易云允许直接下载<br>是否强行尝试下载？', '警告',
 			function() {
-				playSong(songId);
+				songDownload(songId);
 			},
 			function() {},
 			{
