@@ -15,6 +15,7 @@ var coverImage = new Image; // 专辑封面图
 // 此处声明全局变量
 var searchKwd = ''; // 真搜索关键词
 var currentPage = 1; // 当前页码
+var globalLrcTime = '';
 
 
 // 此处声明事件监听
@@ -75,6 +76,11 @@ menuPosi.style.width = mdui.$(searchKwdDom).width() + 'px';
 
 coverImage.crossOrigin = 'anonymous'; // 防跨域图片报错
 
+console.log('    __  ____               __    _      \n' +
+	'   /  |/  (_)________ _   / /   (_)_  __\n' +
+	'  / /|_/ / / ___/ __ `/  / /   / / / / /\n' +
+	' / /  / / (__  ) /_/ /  / /___/ / /_/ / \n' +
+	'/_/  /_/_/____/\__,_/  /_____/_/\__,_/  \n');
 
 // 此处声明主程序
 function searchSong() { // 搜索音乐 主程序
@@ -518,8 +524,8 @@ function songInfo(songId) { // 获取歌曲信息
 					result += obj.result.mv > 0 ? '<a href="https://music.163.com/mv/' + obj.result.mv + '" target="_blank">有（' + obj.result.mv.toString() + '）</a>' : '无';
 					result += '</div></div></div>';
 					result += '<div class="mdui-dialog-actions" style="border-style:solid none none none;border-color:rgba(0,0,0,0.25);border-width:1px">';
-					result += '<button onclick="javaecript:playSong(' + songId + ', ' + obj.result.fee  + ');" class="mdui-btn mdui-ripple mdui-float-left" mdui-dialog-close>立即播放</button>';
-					result += '<button onclick="javaecript:songAddList(' + songId + ', ' + obj.result.fee  + ');" class="mdui-btn mdui-ripple mdui-float-left" mdui-dialog-close>加入到列表</button>';
+					result += '<button onclick="songAddList(' + songId + ', ' + obj.result.fee  + ')" class="mdui-btn mdui-ripple mdui-float-left" mdui-dialog-close>加入到列表</button>';
+					result += '<button onclick="getLrc(' + songId + ', \'' + obj.result.name.replace('\'', '&123*').replace('"', '&456*') + '\')" class="mdui-btn mdui-ripple mdui-float-left" mdui-dialog-close>查看歌词</button>';
 					result += '<button class="mdui-btn mdui-ripple" mdui-dialog-close>OK</button>';
 					result += '</div></div>';
 					result += '<style>.album-pic{width:220px;height:auto;float:right;margin-right:4px}@media(max-width:600px){.album-pic{width:100%;float:none;margin:0 0 4px 0}}</style>';
@@ -587,7 +593,7 @@ function artistInfo(artistId) { // 获取艺术家信息
 					result += '</div>';
 					result += '<div class="mdui-col-xs-12" style="padding:4px 0 0 0">';
 					result += '歌手简介：';
-					result += obj.result.briefDesc != '' ? obj.result.briefDesc.replace(/\n/, '<br>') : '无';
+					result += obj.result.briefDesc != '' ? obj.result.briefDesc.replace(/\n/g, '<br>') : '无';
 					result += '<br>';
 					result += '<p style="padding-top:4px;">热门 Top 5 作品：<br>';
 					if (obj.result.hotSongs.length > 0) {
@@ -680,7 +686,7 @@ function albumInfo(albumId) { // 获取专辑信息
 					result += '</div>';
 					result += '<div class="mdui-col-xs-12" style="padding:4px 0 0 0">';
 					result += '专辑介绍：';
-					result += obj.result.description ? obj.result.description.replace(/\n/, '<br>') : '无';
+					result += obj.result.description ? obj.result.description.replace(/\n/g, '<br>') : '无';
 					result += '<br>';
 					result += '<p style="padding-top:4px;">此专辑包含的歌曲：</p>';
 					if (obj.result.size > 0) {
@@ -714,6 +720,7 @@ function albumInfo(albumId) { // 获取专辑信息
 							result += '<td class="mdui-typo" nowrap>';
 							result += '<a href="javascript:playSong(' + obj.result.songs[y].id + ', ' + obj.result.songs[y].fee + ');" mdui-dialog-close>立即播放</a>&nbsp;&nbsp;';
 							result += '<a href="javascript:songAddList(' + obj.result.songs[y].id + ', ' + obj.result.songs[y].fee + ');" mdui-dialog-close>添加到列表</a>&nbsp;&nbsp;';
+							result += '<a href="javascript:getLrc(' + obj.result.songs[y].id + ', \'' + obj.result.songs[y].name.replace('\'', '&123*').replace('"', '&456*') + '\');" mdui-dialog-close>查看歌词</a>&nbsp;&nbsp;';
 							result += '<a href="javascript:songDownload(' + obj.result.songs[y].id + ', ' + obj.result.songs[y].fee + ');" mdui-dialog-close>下载</a>&nbsp;&nbsp;';
 							result += '<a href="javascript:songInfo(' + obj.result.songs[y].id + ');" mdui-dialog-close>详情</a>';
 							result += '</td>';
@@ -741,6 +748,43 @@ function albumInfo(albumId) { // 获取专辑信息
 						'错误代码：' + obj.code + '<br>错误信息：' + obj.msg, '出错啦！');
 					
 				}
+			}
+		}
+	});
+}
+
+function getLrc(songId, songName) {
+	mdui.$.ajax({
+		method : 'GET',
+		url : 'https://api.yimian.xyz/msc/',
+		data : {
+			type : 'lrc',
+			id : songId
+		},
+		success: function(data) {
+			if (data != '') {
+				var lrcTime = data;
+				var lrcText = lrcTime.replace(/\[.+\]/g, '');
+				
+				globalLrcTime = lrcTime;
+				
+				var result = '<div class="mdui-dialog-content mdui-typo">' +
+					'<div class="mdui-dialog-title">歌词内容 - ' + songName.replace('&123*', '\'').replace('&456*', '"') + '</div>';
+				result += lrcText.replace(/\n/g, '<br>');
+				result += '</div>';
+				result += '<div class="mdui-dialog-actions" style="border-style:solid none none none;border-color:rgba(0,0,0,0.25);border-width:1px">';
+				result += '<button onclick="copyText(globalLrcTime, function(){mdui.snackbar({message:\'复制歌词成功\'});})" class="mdui-btn mdui-ripple mdui-float-left">复制歌词（带时间轴）</button>';
+				result += '<button class="mdui-btn mdui-ripple" mdui-dialog-close>OK</button>';
+				result += '</div>';
+				
+				dialogDiv.innerHTML = result;
+				mdui.$('#info_dialog').mutation(); // Div 内组件初始化
+				
+				let dialog = new mdui.Dialog('#info_dialog');
+				dialog.open();
+				
+			} else {
+				mdui.alert('没有找到歌词！', '提示');
 			}
 		}
 	});
@@ -804,6 +848,7 @@ function jumpPage(page) { // 跳转页码 aka 获取音乐列表
 						result += '<td class="mdui-typo" nowrap>';
 						result += '<a href="javascript:playSong(' + song.id + ', ' + song.fee + ');">立即播放</a>&nbsp;&nbsp;';
 						result += '<a href="javascript:songAddList(' + song.id + ', ' + song.fee + ');">添加到列表</a>&nbsp;&nbsp;';
+						result += '<a href="javascript:getLrc(' + song.id + ', \'' + song.name.replace('\'', '&123*').replace('"', '&456*') + '\');">查看歌词</a>&nbsp;&nbsp;';
 						result += '<a href="javascript:songDownload(' + song.id + ', ' + song.fee + ');">下载</a>&nbsp;&nbsp;';
 						result += '<a href="javascript:songInfo(' + song.id + ');">详情</a>';
 						result += '</td>';
@@ -948,6 +993,11 @@ function enableConsole(button) {
 		button.setAttribute('disabled', true);
 		button.getElementsByTagName('a')[0].setAttribute('disabled', true);
 		vConsole = new VConsole();
+		console.log('    __  ____               __    _      \n' +
+			'   /  |/  (_)________ _   / /   (_)_  __\n' +
+			'  / /|_/ / / ___/ __ `/  / /   / / / / /\n' +
+			' / /  / / (__  ) /_/ /  / /___/ / /_/ / \n' +
+			'/_/  /_/_/____/\__,_/  /_____/_/\__,_/  \n');
 		console.log('====================================\n' +
 			'友情提示：\n' +
 			'请不要在 Console 中运行你不清楚的代码。\n' +
@@ -955,4 +1005,18 @@ function enableConsole(button) {
 			'====================================');
 		mdui.alert('vConsole 已启用', '提示');
 	}
+}
+
+function copyText(text, callback) {
+    var tag = document.createElement('textarea');
+    tag.setAttribute('id', 'cp_hgz_input');
+    tag.value = text.replace('&123*', '\'').replace('&456*', '\'');
+
+    document.getElementsByTagName('body')[0].appendChild(tag);
+
+    document.getElementById('cp_hgz_input').select();
+    document.execCommand('copy');
+    document.getElementById('cp_hgz_input').remove();
+    
+    if(callback) {callback(text)}
 }
